@@ -1,0 +1,36 @@
+services:
+  web:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: reservas_web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - frontend
+
+  db:
+    image: mysql:8.0
+    container_name: reservas_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - backend
+    # Sin "ports": la base de datos no se publica al host
+
+  # TODO: servicio api (contenedor independiente, puerto 3000)
+
+volumes:
+  mysql_data:
+
+networks:
+  frontend:
+  backend:
